@@ -20,5 +20,5 @@ def get_daily_returns(stock_name):
     day_df = yf.Ticker(stock_name).history('1d')
     return day_df
 
-df = get_daily_returns("AAPL")
+df = get_week_returns("AAPL")
 print(df)
