@@ -1,24 +1,31 @@
-import requests
+from bs4 import BeautifulSoup
 import re
-import pandas as pd
-import yfinance as yf
-import numpy as np
+import requests
+from googlesearch import search
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
-def get_year_returns(stock_name):
-    single_year_df = yf.Ticker(stock_name).history('1y')
-    return single_year_df
+def convert_to_stock_symbol(company_name):
+    '''
+    converts a given company name to its "stock name", or essentially
+    what it's name is on the NASDAQ/S&P markets
+    '''
 
-def get_month_returns(stock_name):
-    month_df = yf.Ticker(stock_name).history('1mo')
-    return month_df
+    driver = webdriver.Chrome(ChromeDriverManager().install())    
+    driver.get("https://www.marketwatch.com/tools/quotes/lookup.asp?")
+    input_fields(driver, company_name)
+    stock_symbols = driver.find_elements_by_xpath('//td[@class="bottomborder"]')
+    return stock_symbols[0].text
 
-def get_week_returns(stock_name):
-    week_df = yf.Ticker(stock_name).history('1wk')
-    return week_df
+def input_fields(driver, company_name):
+    '''
+    Upon accessing the symbol lookup site, this method will be used
+    to input the necessary details into the text input field(s), and 
+    then click the search button
+    '''
 
-def get_daily_returns(stock_name):
-    day_df = yf.Ticker(stock_name).history('1d')
-    return day_df
+    company_input = driver.find_element_by_id("Lookup")
+    company_input.send_keys(str(company_name))
 
-df = get_week_returns("AAPL")
-print(df)
+    search_button = driver.find_element_by_xpath("//input[@type='submit']")
+    search_button.click()
