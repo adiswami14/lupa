@@ -1,6 +1,7 @@
 import pandas as pd
 import yfinance as yf
 import numpy as np
+import webscraper
 
 def get_year_returns(stock_name):
     single_year_df = yf.Ticker(stock_name).history('1y')
@@ -18,5 +19,5 @@ def get_daily_returns(stock_name):
     day_df = yf.Ticker(stock_name).history('1d')
     return day_df
 
-df = get_week_returns("AAPL")
+df = get_week_returns(webscraper.convert_to_stock_symbol("Mccormick"))
 print(df)
