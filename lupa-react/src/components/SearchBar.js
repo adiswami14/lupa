@@ -1,4 +1,6 @@
 import React from 'react'
+import './SearchBar.css'
+
 
 class SearchBar extends React.Component {
     constructor() {
@@ -11,9 +13,8 @@ class SearchBar extends React.Component {
     render() {
         return (
         <div>
-            <h3>SEARCH BAR</h3>
             <form onSubmit={this.handleSubmit}>
-            <label htmlFor="search-bar">
+            <label class = "label" htmlFor="search-bar">
                 Look up stocks!
             </label>
             <input
@@ -21,7 +22,7 @@ class SearchBar extends React.Component {
                 onChange={this.handleChange}
                 value={this.state.text}
             />
-            <button>
+            <button class = "button">
                 Search!
             </button>
             </form>

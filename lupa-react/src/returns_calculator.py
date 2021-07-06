@@ -20,4 +20,4 @@ def get_daily_returns(stock_name):
     return day_df
 
 df = get_week_returns(webscraper.convert_to_stock_symbol("Mccormick"))
-print(df)
+df.to_csv("stocks.csv")
