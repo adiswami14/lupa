@@ -19,5 +19,5 @@ def get_daily_returns(stock_name):
     day_df = yf.Ticker(stock_name).history('1d')
     return day_df
 
-df = get_week_returns(webscraper.convert_to_stock_symbol("Mccormick"))
-df.to_csv("stocks.csv")
+df = get_week_returns(webscraper.convert_to_stock_symbol("Keurig"))
+df.to_csv("lupa-react/public/stocks.csv")

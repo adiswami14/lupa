@@ -6,6 +6,13 @@ import './StockGraph.css'
 class StockGraph extends React.Component {
     constructor(name) {
         super(name);
+        this.readCSV();
+    }
+
+    readCSV() {
+        d3.csv('/stocks.csv', d3.autoType).then(function (data) {
+            console.log(data)
+        });
     }
 
     render() {
