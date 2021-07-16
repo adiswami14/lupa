@@ -1,1 +1,7 @@
 /* random comment */
+
+.line {
+    fill:none;
+    stroke: black;
+    stroke-width: 5px;
+}

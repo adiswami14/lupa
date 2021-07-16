@@ -14,17 +14,10 @@ class StockGraph extends React.Component {
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
-        // parse the date / time
-        var parseTime = d3.timeParse("%Y-%m-%d");
 
         // set the ranges
-        var x = d3.scaleTime().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
-
-        // define the line
-        var valueline = d3.line()
-        .x(function(d) { return d.Date; })
-        .y(function(d) { return d.Close; });
+        var x = d3.scaleLinear().range([0, width]);
+        var y = d3.scaleLinear().range([0, height]);
 
         // append the svg obgect to the body of the page
         // appends a 'group' element to 'svg'
@@ -37,42 +30,19 @@ class StockGraph extends React.Component {
             "translate(" + margin.left + "," + margin.top + ")");
 
         // Get the data
-        d3.csv("/stocks.csv").then(function(data) {
+        d3.csv("/test.csv").then(function(data) {
 
         // format the data
         data.forEach(function(d) {
-            d.Date = parseTime(d.Date);
-            d.Close = +d.Close;
+            d.X = d.X*100;
+            d.Y = +d.Y*50;
         });
+        
+        data.sort(function(a,b){return a.X<b.X;});
 
         // Scale the range of the data
-        x.domain(d3.extent(data, function(d) { return d.Date; }));
-        y.domain([0, d3.max(data, function(d) { return d.Close; })]);
-
-        // set the gradient
-        svg.append("linearGradient")				
-        .attr("id", "line-gradient")			
-        .attr("gradientUnits", "userSpaceOnUse")	
-        .attr("x1", 0).attr("y1", 0)			
-        .attr("x2", 0).attr("y2", 1000)		
-        .selectAll("stop")						
-        .data([								
-        {offset: "0%", color: "red"},		
-        {offset: "40%", color: "red"},	
-        {offset: "40%", color: "black"},		
-        {offset: "62%", color: "black"},		
-        {offset: "62%", color: "lawngreen"},	
-        {offset: "100%", color: "lawngreen"}	
-        ])					
-        .enter().append("stop")			
-        .attr("offset", function(d) { return d.offset; })	
-        .attr("stop-color", function(d) { return d.color; });
-
-        // Add the valueline path.
-        svg.append("path")
-        .data([data])
-        .attr("class", "line")
-        .attr("d", valueline);
+        x.domain(d3.extent(data, function(d) { return d.X; }));
+        y.domain([d3.max(data, function(d) { return d.Y; }), 0]);
 
         // Add the X Axis
         svg.append("g")
@@ -82,6 +52,15 @@ class StockGraph extends React.Component {
         // Add the Y Axis
         svg.append("g")
         .call(d3.axisLeft(y));
+
+        // define the line
+        var valueline = d3.line().x(function(d) { return d.X; }).y(function(d) { return d.Y; });
+
+        // Add the valueline path.
+        svg.append("path")
+        .data([data])
+        .attr("class", "line")
+        .attr("d", valueline);
 
         });
     }
