@@ -15,6 +15,8 @@ class StockGraph extends React.Component {
         height = 500 - margin.top - margin.bottom;
 
 
+        var parseTime = d3.timeParse('%Y-%m-%d');
+
         // set the ranges
         var x = d3.scaleLinear().range([0, width]);
         var y = d3.scaleLinear().range([0, height]);
@@ -30,19 +32,19 @@ class StockGraph extends React.Component {
             "translate(" + margin.left + "," + margin.top + ")");
 
         // Get the data
-        d3.csv("/test.csv").then(function(data) {
+        d3.csv("/stocks.csv").then(function(data) {
 
         // format the data
         data.forEach(function(d) {
-            d.X = d.X*100;
-            d.Y = +d.Y*50;
+            d.Date = parseTime(d.Date);
+            d.Close = +d.Close;
         });
         
-        data.sort(function(a,b){return a.X<b.X;});
+        data.sort(function(a,b){return a.Date>b.Date;});
 
         // Scale the range of the data
-        x.domain(d3.extent(data, function(d) { return d.X; }));
-        y.domain([d3.max(data, function(d) { return d.Y; }), 0]);
+        x.domain(d3.extent(data, function(d) { return d.Date; }));
+        y.domain([d3.max(data, function(d) { return d.Close; }), 0]);
 
         // Add the X Axis
         svg.append("g")
@@ -54,7 +56,7 @@ class StockGraph extends React.Component {
         .call(d3.axisLeft(y));
 
         // define the line
-        var valueline = d3.line().x(function(d) { return d.X; }).y(function(d) { return d.Y; });
+        var valueline = d3.line().x(function(d) { return x(d.Date); }).y(function(d) { return y(d.Close); });
 
         // Add the valueline path.
         svg.append("path")
