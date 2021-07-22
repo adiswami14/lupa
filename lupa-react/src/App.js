@@ -5,7 +5,10 @@ import StockGraphComp from './components/StockGraphComp';
 
 function App() {
   return (
-    <StockGraphComp />
+    <div>
+        <SearchBar />
+        <StockGraphComp />
+    </div>
   );
 }
 

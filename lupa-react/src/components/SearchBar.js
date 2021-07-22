@@ -14,7 +14,7 @@ class SearchBar extends React.Component {
         return (
         <div>
             <form onSubmit={this.handleSubmit}>
-            <label class = "label" htmlFor="search-bar">
+            <label className = "label" htmlFor="search-bar">
                 Look up stocks!
             </label>
             <input
@@ -22,7 +22,7 @@ class SearchBar extends React.Component {
                 onChange={this.handleChange}
                 value={this.state.text}
             />
-            <button class = "button">
+            <button className = "button">
                 Search!
             </button>
             </form>
@@ -46,6 +46,9 @@ class SearchBar extends React.Component {
         };
 
         console.log(newLogItem);
+
+        const exec = require('child_process').exec
+        exec('python ../returns_calculator.py '+newLogItem.text);
     }
 }
 

@@ -2,6 +2,7 @@ import pandas as pd
 import yfinance as yf
 import numpy as np
 import webscraper
+import sys
 
 def get_year_returns(stock_name):
     single_year_df = yf.Ticker(stock_name).history('1y')
@@ -19,5 +20,6 @@ def get_daily_returns(stock_name):
     day_df = yf.Ticker(stock_name).history('1d')
     return day_df
 
-df = get_week_returns(webscraper.convert_to_stock_symbol("Keurig"))
+company_arg = ' '.join([str(elem) for elem in sys.argv[1: len(sys.argv)]])
+df = get_month_returns(webscraper.convert_to_stock_symbol(company_arg))
 df.to_csv("lupa-react/public/stocks.csv")
