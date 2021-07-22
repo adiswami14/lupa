@@ -1,15 +1,11 @@
 import './App.css';
 import SearchBar from './components/SearchBar';
 import StockGraph from './components/StockGraph';
+import StockGraphComp from './components/StockGraphComp';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        {/*<SearchBar /> */}
-        <StockGraph />
-      </header>
-    </div>
+    <StockGraphComp />
   );
 }
 
