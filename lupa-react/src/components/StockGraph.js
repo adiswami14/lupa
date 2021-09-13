@@ -18,31 +18,43 @@ var svg = d3.select(chart).append("svg")
 .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("/stocks.csv").then(function(data) {
+svg.append("g")
+.attr("transform", "translate(0," + height + ")")
+.call(d3.axisBottom(x));
 
-    data.forEach(function(d) {
-        d.Date = parseTime(d.Date);
-        d.Close = +d.Close;
+svg.append("g")
+.call(d3.axisLeft(y));
+
+// let linedata = await returnLineData();
+// console.log(linedata);
+
+// svg.append("path")
+//     .data([dataset[1]])
+//     .attr("d", dataset[0])
+//     .attr("class", "line");
+
+async function getCsvData(csvPath) {
+    return await d3.csv(csvPath).then(function(data) {
+
+        data.forEach(function(d) {
+            d.Date = parseTime(d.Date);
+            d.Close = +d.Close;
+        });
+
+        data.sort(function(a,b){return a.Date>b.Date;});
+
+        x.domain(d3.extent(data, function(d) { return d.Date; }));
+        y.domain([d3.max(data, function(d) { return d.Close; }), 0]);
+
+        var valueline = d3.line().x(function(d) { return x(d.Date); }).y(function(d) { return y(d.Close); });
+        return [valueline, data]
+        
     });
+}
 
-    data.sort(function(a,b){return a.Date>b.Date;});
-
-    x.domain(d3.extent(data, function(d) { return d.Date; }));
-    y.domain([d3.max(data, function(d) { return d.Close; }), 0]);
-
-    svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x));
-
-    svg.append("g")
-    .call(d3.axisLeft(y));
-
-    var valueline = d3.line().x(function(d) { return x(d.Date); }).y(function(d) { return y(d.Close); });
-
-    svg.append("path")
-    .data([data])
-    .attr("class", "line")
-    .attr("d", valueline);
-});
+async function returnLineData() {
+    let dataset = await getCsvData("/stocks.csv")
+    return dataset;
+}
 
 export default chart;
