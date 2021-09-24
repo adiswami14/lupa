@@ -1,60 +1,118 @@
 import * as d3 from 'd3';
 import './StockGraph.css'
+import React from 'react';
 
-var margin = {top: 20, right: 20, bottom: 30, left: 50},
-width = 960 - margin.left - margin.right,
-height = 500 - margin.top - margin.bottom;
+const margin = { top: 40, right: 80, bottom: 60, left: 50 },
+    width = 960 - margin.left - margin.right,
+    height = 280 - margin.top - margin.bottom,
+    color = "OrangeRed";
 
-var chart = document.createElement("div");
+const Chart = () => {
+    const [activeIndex, setActiveIndex] = React.useState(null),
+        [data, setData] = React.useState([]);
 
-var parseTime = d3.timeParse('%Y-%m-%d');
+    React.useEffect(() => {
+        d3.csv("/stocks.csv").then((d) => {
+            d = d.reverse();
+            const parseDate = d3.timeParse('%Y-%m-%d');
+            d.forEach((i) => {
+                i.Date = parseDate(i.Date);
+                i.Close = Number(i.Close);
+            });
+            setData(d);
+          });
+          return () => undefined;
+      }, []);
 
-var x = d3.scaleLinear().range([0, width]);
-var y = d3.scaleLinear().range([0, height]);
-var svg = d3.select(chart).append("svg")
-.attr("width", width + margin.left + margin.right)
-.attr("height", height + margin.top + margin.bottom)
-.append("g")
-.attr("transform",
-    "translate(" + margin.left + "," + margin.top + ")");
+    const yMinValue = d3.min(data, (d) => d.Close),
+        yMaxValue = d3.max(data, (d) => d.Close);
 
-svg.append("g")
-.attr("transform", "translate(0," + height + ")")
-.call(d3.axisBottom(x));
+    const getX = d3
+        .scaleTime()
+        .domain(d3.extent(data, (d) => d.Date))
+        .range([0, width]);
 
-svg.append("g")
-.call(d3.axisLeft(y));
+    const getY = d3
+        .scaleLinear()
+        .domain([yMinValue - 1, yMaxValue + 2])
+        .range([height, 0]);
 
-// let linedata = await returnLineData();
-// console.log(linedata);
+    const getXAxis = (ref) => {
+        const xAxis = d3.axisBottom(getX);
+        d3.select(ref).call(xAxis.tickFormat(d3.timeFormat("%m-%d-%y")));
+    };
 
-// svg.append("path")
-//     .data([dataset[1]])
-//     .attr("d", dataset[0])
-//     .attr("class", "line");
+    const getYAxis = (ref) => {
+        const yAxis = d3.axisLeft(getY).tickSize(-width).tickPadding(7);
+        d3.select(ref).call(yAxis);
+    };
 
-async function getCsvData(csvPath) {
-    return await d3.csv(csvPath).then(function(data) {
+    const linePath = d3
+        .line()
+        .x((d) => getX(d.Date))
+        .y((d) => getY(d.Close))
+        .curve(d3.curveMonotoneX)(data);
 
-        data.forEach(function(d) {
-            d.Date = parseTime(d.Date);
-            d.Close = +d.Close;
-        });
+    const areaPath = d3
+        .area()
+        .x((d) => getX(d.Date))
+        .y0((d) => getY(d.Close))
+        .y1(() => getY(yMinValue - 1))
+        .curve(d3.curveMonotoneX)(data);
 
-        data.sort(function(a,b){return a.Date>b.Date;});
+    const handleMouseMove = (e) => {
+        const bisect = d3.bisector((d) => d.Date).left,
+            x0 = getX.invert(d3.pointer(e, this)[0]),
+            index = bisect(data, x0, 1);
+        setActiveIndex(index);
+    };
 
-        x.domain(d3.extent(data, function(d) { return d.Date; }));
-        y.domain([d3.max(data, function(d) { return d.Close; }), 0]);
+    const handleMouseLeave = () => {
+        setActiveIndex(null);
+    };
 
-        var valueline = d3.line().x(function(d) { return x(d.Date); }).y(function(d) { return y(d.Close); });
-        return [valueline, data]
-        
-    });
-}
+    return (
+      <div className="wrapper">
+          <svg
+              viewBox={`0 0 ${width + margin.left + margin.right} 
+                              ${height + margin.top + margin.bottom}`}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+          >
+              <g
+                  className="axis xAxis"
+                  ref={getXAxis}
+                  transform={`translate(0,${height})`}
+              />
+              <path fill={color} d={areaPath} opacity={0.3} />
+              <path strokeWidth={3} fill="none" stroke={color} d={linePath} />
 
-async function returnLineData() {
-    let dataset = await getCsvData("/stocks.csv")
-    return dataset;
-}
+              {data.map((item, index) => {
+                  return (
+                      <g key={index}>
+                          <text
+                              fill="#666"
+                              x={getX(item.Date)}
+                              y={getY(item.Close) - 20}
+                              textAnchor="middle"
+                          >
+                              {index === activeIndex ? item.price : ""}
+                          </text>
+                          <circle
+                              cx={getX(item.Date)}
+                              cy={getY(item.Close)}
+                              r={index === activeIndex ? 6 : 4}
+                              fill={color}
+                              strokeWidth={index === activeIndex ? 2 : 0}
+                              stroke="#fff"
+                              style={{ transition: "ease-out .1s" }}
+                          />
+                      </g>
+                  );
+              })}
+          </svg>
+      </div>
+    );
+};
 
-export default chart;
+export default Chart;

@@ -46,9 +46,7 @@ class SearchBar extends React.Component {
         };
 
         console.log(newLogItem);
-
-        const exec = require('child_process').exec
-        exec('python ../returns_calculator.py '+newLogItem.text);
+        
     }
 }
 
